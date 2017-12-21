@@ -50,7 +50,10 @@ typedef __int64             h5_stat_size_t;
 /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
  * transformations when performing I/O.
  */
-#define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
+// #define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
+// EDEN-851: Patch hdf5 to open unicode file paths.
+H5_DLL int win_open_patched(const char *name, int oflag, int pmode);
+#define HDopen(S,F,M)       win_open_patched(S,F|_O_BINARY,M)
 #define HDread(F,M,Z)       _read(F,M,Z)
 #define HDrmdir(S)          _rmdir(S)
 #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))

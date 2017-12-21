@@ -22,9 +22,23 @@
 #include "H5MMprivate.h"    /* Memory management        */
 #include "H5Pprivate.h"     /* Property lists           */
 
+#include <stdio.h>
+
 #ifdef H5_HAVE_WINDOWS
 
-
+int win_open_patched(const char *name, int oflag, int pmode)
+{
+    // Patch to enable the opening of unicode paths
+    // See: EDEN-851
+    int fd = -1;
+    int name_len = strlen(name);
+    wchar_t* wname = (wchar_t*)malloc( sizeof(wchar_t)*(name_len + 1) );
+    MultiByteToWideChar( CP_UTF8, 0, name, -1, wname, name_len + 1 );
+    fd=_wopen(wname, oflag, pmode);
+    free(wname);
+    return fd;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_windows
  *
